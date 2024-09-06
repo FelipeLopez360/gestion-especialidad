@@ -1,5 +1,6 @@
 package com.felipelopez.gestion_especialidad.controller;
 
+import com.felipelopez.gestion_especialidad.exception.ResourceNotFoundException;
 import com.felipelopez.gestion_especialidad.model.Estudiante;
 import com.felipelopez.gestion_especialidad.service.EstudianteService;
 import lombok.AllArgsConstructor;
@@ -26,8 +27,14 @@ public class EstudianteController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Estudiante> obtenerEstudiantePorId(@PathVariable Long id) {
-        Estudiante estudiante = estudianteService.obtenerEstudiantePorId(id);
-        return new ResponseEntity<>(estudiante, HttpStatus.OK);
+        try {
+            Estudiante estudiante = estudianteService.obtenerEstudiantePorId(id);
+            return new ResponseEntity<>(estudiante, HttpStatus.OK);
+        } catch (ResourceNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }catch (Exception e){
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping
@@ -38,6 +45,13 @@ public class EstudianteController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Estudiante> actualizarEstudiante(@PathVariable Long id, @RequestBody Estudiante estudiante) {
+        try {
+            Estudiante estudianteExistente = estudianteService.obtenerEstudiantePorId(id);
+        } catch (ResourceNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
         Estudiante estudianteActualizado = estudianteService.actualizarEstudiante(id, estudiante);
         return new ResponseEntity<>(estudianteActualizado, HttpStatus.OK);
     }
